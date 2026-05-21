@@ -14,6 +14,8 @@ public class LoginController {
     private TextField IPInput;
     @FXML
     private TextField usernameInput;
+    @FXML
+    private TextField portaInput;
     
     private Stage stage;
     private Scene scene;
@@ -21,8 +23,8 @@ public class LoginController {
     @FXML
     public void creaChatClient(ActionEvent event) throws IOException {
         // Controlla che l'utente abbia inserito i dati di base
-        if (IPInput.getText().isEmpty() || usernameInput.getText().isEmpty()) {
-            System.out.println("Inserisci IP e Username validi!");
+        if (IPInput.getText().isEmpty() || usernameInput.getText().isEmpty() || portaInput.getText().isEmpty()) {
+            System.out.println("Inserisci IP, porta e Username validi!");
             return;
         }
         cambiaScena();
@@ -34,6 +36,7 @@ public class LoginController {
         BroadcastController broadcastController = loader.getController();
         broadcastController.setIP(IPInput.getText());
         broadcastController.setUsername(usernameInput.getText());
+        broadcastController.setPorta(portaInput.getText());
         broadcastController.connettiAlServer();
         stage = (Stage) IPInput.getScene().getWindow(); 
         scene = new Scene(root);

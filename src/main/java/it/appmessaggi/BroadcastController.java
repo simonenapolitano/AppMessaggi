@@ -14,9 +14,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class BroadcastController {
-    private static final int SERVER_PORT = 12345;
     private String IP;
     private String usernameRicevuto;
+    private String portaRicevuta;
     
     private PrintWriter out;
     private Socket socket;
@@ -31,6 +31,10 @@ public class BroadcastController {
 
     public void setIP(String IP) {
         this.IP = IP;
+    }
+
+    public void setPorta(String porta){
+        this.portaRicevuta = porta;
     }
 
     public void tornaAlLogin(){
@@ -59,7 +63,7 @@ public class BroadcastController {
 
         new Thread(() -> {
             try {
-                socket = new Socket(IP, SERVER_PORT);
+                socket = new Socket(IP, Integer.parseInt(portaRicevuta));
                 System.out.println("Connesso al server della chat da BroadcastController!");
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));

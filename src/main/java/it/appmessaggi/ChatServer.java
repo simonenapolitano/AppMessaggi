@@ -4,15 +4,25 @@ import java.net.*;
 import java.util.*;
 
 public class ChatServer {
-    private static final int PORT = 12345;
+    private Scanner scanner = new Scanner(System.in);
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
+    private int PORT = 0;
 
-    public static void main(String[] args) {
+    public ChatServer(){
         try {
             InetAddress ip = InetAddress.getLocalHost();
             System.out.println("Il tuo indirizzo IP locale è: " + ip.getHostAddress());
         } catch (UnknownHostException e) {
             System.err.println("Impossibile trovare l'indirizzo IP: " + e.getMessage());
+        }
+
+        try {
+            System.out.print("\nInserisci una porta: ");
+            PORT = scanner.nextInt();
+            scanner.nextLine();
+        } catch (Exception e) {
+            System.out.println("Numero porta invalido!");
+            System.exit(1);
         }
 
         System.out.println("Il Server della chat è avviato sulla porta " + PORT + "...");
@@ -26,6 +36,10 @@ public class ChatServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        new ChatServer();
     }
     public static void broadcast(String message) {
         synchronized (clientWriters) {
