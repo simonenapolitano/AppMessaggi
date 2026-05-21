@@ -40,7 +40,7 @@ public class BroadcastController {
     public void tornaAlLogin(){
         try {
             chiudiConnessione();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/login.fxml"));
             Parent root = loader.load();
             stage = (Stage) messageInput.getScene().getWindow(); 
             scene = new Scene(root);

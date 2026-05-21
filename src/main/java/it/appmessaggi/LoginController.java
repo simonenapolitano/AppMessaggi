@@ -31,7 +31,7 @@ public class LoginController {
     }
 
     private void cambiaScena() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("messaggi.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/messaggi.fxml"));
         Parent root = loader.load();
         BroadcastController broadcastController = loader.getController();
         broadcastController.setIP(IPInput.getText());

@@ -9,13 +9,7 @@ public class ChatServer {
     private int PORT = 0;
 
     public ChatServer(){
-        try {
-            InetAddress ip = InetAddress.getLocalHost();
-            System.out.println("Il tuo indirizzo IP locale è: " + ip.getHostAddress());
-        } catch (UnknownHostException e) {
-            System.err.println("Impossibile trovare l'indirizzo IP: " + e.getMessage());
-        }
-
+        
         try {
             System.out.print("\nInserisci una porta: ");
             PORT = scanner.nextInt();
@@ -23,6 +17,13 @@ public class ChatServer {
         } catch (Exception e) {
             System.out.println("Numero porta invalido!");
             System.exit(1);
+        }
+
+        try {
+            InetAddress ip = InetAddress.getLocalHost();
+            System.out.println("Il tuo indirizzo IP locale è: " + ip.getHostAddress());
+        } catch (UnknownHostException e) {
+            System.err.println("Impossibile trovare l'indirizzo IP: " + e.getMessage());
         }
 
         System.out.println("Il Server della chat è avviato sulla porta " + PORT + "...");
@@ -41,6 +42,7 @@ public class ChatServer {
     public static void main(String[] args) {
         new ChatServer();
     }
+    
     public static void broadcast(String message) {
         synchronized (clientWriters) {
             for (PrintWriter writer : clientWriters) {
