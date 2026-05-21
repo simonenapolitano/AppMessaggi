@@ -9,6 +9,14 @@ public class ChatServer {
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
 
     public static void main(String[] args) {
+        try {
+            // Recupera l'IP del localhost
+            InetAddress ip = InetAddress.getLocalHost();
+            System.out.println("Il tuo indirizzo IP locale è: " + ip.getHostAddress());
+        } catch (UnknownHostException e) {
+            System.err.println("Impossibile trovare l'indirizzo IP: " + e.getMessage());
+        }
+
         System.out.println("Il Server della chat è avviato sulla porta " + PORT + "...");
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
@@ -74,6 +82,8 @@ public class ChatServer {
                 if (username != null) broadcast("[SERVER] " + username + " ha lasciato la chat.");
                 try { socket.close(); } catch (IOException e) {}
             }
+
+            
         }
     }
 }
