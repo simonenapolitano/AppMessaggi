@@ -10,9 +10,9 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("prova.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("login.fxml"));
             Scene scene = new Scene(root);
-            stage.setTitle("messaggi");
+            stage.setTitle("AppMessaggi");
             stage.setScene(scene);
             stage.setResizable(false);
             stage.show();
