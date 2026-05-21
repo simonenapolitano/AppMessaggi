@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,11 +14,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-public class Controller {
+public class LoginController {
     @FXML
     private TextField IPInput;
     @FXML
     private TextField usernameInput;
+    @FXML
+    private TextField messageInput;
     private Stage stage;
     private Scene scene;
 
@@ -38,7 +39,6 @@ public class Controller {
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                Scanner scanner = new Scanner(System.in);
 
                 String username = usernameInput.getText();
                 out.println(username); // Lo invia subito al server come identificativo
@@ -50,7 +50,7 @@ public class Controller {
                 // Questo ciclo principale si occupa SOLO di leggere quello che scrivi tu sul cmd
                 /*System.out.println("Puoi iniziare a scrivere. Digita '/quit' per uscire.");
                 while (true) {
-                    String msg = scanner.nextLine();
+                    String msg = messageInput.getText();
                     out.println(msg);
                     if (msg.equalsIgnoreCase("/quit")) {
                         break;
@@ -66,7 +66,13 @@ public class Controller {
         }
 
         private void cambiaScena() throws IOException {
-            Parent root = FXMLLoader.load(getClass().getResource("messaggi.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("messaggi.fxml"));
+            Parent root = loader.load();
+
+            BroadcastController broadcastController = loader.getController();
+            broadcastController.setIP(IPInput.getText());
+            broadcastController.setUsername(usernameInput.getText());
+
             
             // Recupera lo stage attuale da un elemento esistente (es. un anchorPane)
             stage = (Stage)IPInput.getScene().getWindow(); 
