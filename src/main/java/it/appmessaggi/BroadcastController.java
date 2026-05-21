@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.controlsfx.control.Notifications;
 
 public class BroadcastController {
     private String IP;
@@ -69,7 +70,9 @@ public class BroadcastController {
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
                 out.println(usernameRicevuto);
-                new Thread(new ReadThread(in, this)).start();
+                Thread t = new Thread(new ReadThread(in, this));
+                t.setDaemon(true);
+                t.start();
 
             } catch (IOException e) {
                 System.out.println("Impossibile connettersi al server.");
@@ -113,6 +116,17 @@ public class BroadcastController {
                     String messaggio = serverMessage;
                     javafx.application.Platform.runLater(() -> {
                         controller.areaMessaggi.appendText(messaggio + "\n");
+
+                        Stage stageAttuale = (Stage) controller.areaMessaggi.getScene().getWindow();
+                        if (!stageAttuale.isFocused()) {
+                            String notifica = messaggio;
+                            int maxCaratteri = 40;
+                            if (notifica.length() > maxCaratteri) {
+                                notifica = notifica.substring(0, maxCaratteri) + "...";
+                            }
+                            Notifications.create().title("Uazzapp 2").text(notifica).darkStyle().showInformation();
+                        }
+
                     });
                 }
             } catch (IOException e) {

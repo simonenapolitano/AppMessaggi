@@ -6,10 +6,12 @@ import java.util.*;
 public class ChatServer {
     private Scanner scanner = new Scanner(System.in);
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
+    private static Set<Socket> clientSockets = Collections.synchronizedSet(new HashSet<>());  
     private int PORT = 0;
+    private ServerSocket serverSocket;
+    private volatile boolean running = true; 
 
     public ChatServer(){
-        
         try {
             System.out.print("\nInserisci una porta: ");
             PORT = scanner.nextInt();
@@ -27,15 +29,29 @@ public class ChatServer {
         }
 
         System.out.println("Il Server della chat è avviato sulla porta " + PORT + "...");
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            while (true) {
+        System.out.println("Scrivi '/stop' in qualsiasi momento per spegnere il server.");
+        
+        Thread comandoThread = new Thread(new GestoreComandiServer());
+        comandoThread.setDaemon(true); 
+        comandoThread.start();
+
+        try {
+            serverSocket = new ServerSocket(PORT);
+            while (running) {
                 Socket clientSocket = serverSocket.accept();
+                if (!running) break;
+                
                 System.out.println("Nuovo utente connesso: " + clientSocket.getRemoteSocketAddress());
+                clientSockets.add(clientSocket);
                 
                 new Thread(new ClientHandler(clientSocket)).start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            if (running) {
+                e.printStackTrace();
+            } else {
+                System.out.println("ServerSocket chiuso correttamente.");
+            }
         }
     }
 
@@ -49,6 +65,48 @@ public class ChatServer {
                 writer.println(message);
             }
         }
+    }
+
+    private class GestoreComandiServer implements Runnable {
+        @Override
+        public void run() {
+            while (running) {
+                String comando = scanner.nextLine();
+                if (comando.equalsIgnoreCase("/stop")) {
+                    spegniServer();
+                    break;
+                }
+            }
+        }
+    }
+
+    private void spegniServer() {
+        System.out.println("Spegnimento del server in corso...");
+        running = false;
+        broadcast("IL SERVER STA PER ESSERE CHIUSO.");
+
+        
+        synchronized (clientSockets) {
+            for (Socket s : clientSockets) {
+                try {
+                    if (!s.isClosed()) s.close();
+                } catch (IOException e) {
+                    
+                }
+            }
+        }
+
+        
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Errore durante la chiusura del ServerSocket: " + e.getMessage());
+        }
+
+        System.out.println("Server spento con successo. Arrivederci!");
+        System.exit(0);
     }
 
     private static class ClientHandler implements Runnable {
@@ -83,16 +141,15 @@ public class ChatServer {
                 System.out.println("Connessione interrotta con " + username);
             } finally {
                 if (out != null) clientWriters.remove(out);
+                clientSockets.remove(socket);
                 if (username != null) broadcast(username + " ha lasciato la chat.");
                 try {
-                    socket.close(); 
+                    socket.close();
                 } 
                 catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-
-            
         }
     }
 }
