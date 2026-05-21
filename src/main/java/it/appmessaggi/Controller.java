@@ -7,15 +7,32 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Controller {
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
+public class Controller {
+    @FXML
+    private TextField IPInput;
+    @FXML
+    private TextField usernameInput;
+    private Stage stage;
+    private Scene scene;
+
+    public void creaChatClient(ActionEvent event) throws IOException{
+        new ChatClient();
+    }
 
     class ChatClient{
-        private static final String SERVER_IP = "172.20.10.3"; // 'localhost' per testarlo sullo stesso PC
         private static final int SERVER_PORT = 12345;
 
-        public static void main(String[] args) {
+        public ChatClient(){
             try {
+                final String SERVER_IP = IPInput.getText();
                 Socket socket = new Socket(SERVER_IP, SERVER_PORT);
                 System.out.println("Connesso al server della chat!");
 
@@ -23,23 +40,22 @@ public class Controller {
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 Scanner scanner = new Scanner(System.in);
 
-                // Chiede il nome utente al terminale
-                System.out.print("Inserisci il tuo nome utente: ");
-                String username = scanner.nextLine();
+                String username = usernameInput.getText();
                 out.println(username); // Lo invia subito al server come identificativo
 
                 // FONDAMENTALE: Avvia un thread per leggere i messaggi in arrivo dal server
                 new Thread(new ReadThread(in)).start();
 
+                cambiaScena();
                 // Questo ciclo principale si occupa SOLO di leggere quello che scrivi tu sul cmd
-                System.out.println("Puoi iniziare a scrivere. Digita '/quit' per uscire.");
+                /*System.out.println("Puoi iniziare a scrivere. Digita '/quit' per uscire.");
                 while (true) {
                     String msg = scanner.nextLine();
                     out.println(msg);
                     if (msg.equalsIgnoreCase("/quit")) {
                         break;
                     }
-                }
+                }*/
 
                 socket.close();
                 System.exit(0);
@@ -47,6 +63,17 @@ public class Controller {
             } catch (IOException e) {
                 System.out.println("Impossibile connettersi al server. Assicurati che sia avviato.");
             }
+        }
+
+        private void cambiaScena() throws IOException {
+            Parent root = FXMLLoader.load(getClass().getResource("messaggi.fxml"));
+            
+            // Recupera lo stage attuale da un elemento esistente (es. un anchorPane)
+            stage = (Stage)IPInput.getScene().getWindow(); 
+            
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
         }
 
         // Thread interno che rimane in ascolto in background dei messaggi degli altri
