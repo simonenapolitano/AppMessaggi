@@ -1,11 +1,14 @@
 package it.appmessaggi;
 
 import java.io.IOException;
+import java.net.Socket;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
@@ -16,6 +19,8 @@ public class LoginController {
     private TextField usernameInput;
     @FXML
     private TextField portaInput;
+    @FXML
+    private Label errorLabel;
     
     private Stage stage;
     private Scene scene;
@@ -24,10 +29,35 @@ public class LoginController {
     public void creaChatClient(ActionEvent event) throws IOException {
         // Controlla che l'utente abbia inserito i dati di base
         if (IPInput.getText().isEmpty() || usernameInput.getText().isEmpty() || portaInput.getText().isEmpty()) {
-            System.out.println("Inserisci IP, porta e Username validi!");
+            errorLabel.setText("Inserisci IP, porta e Username validi!");
             return;
         }
-        cambiaScena();
+        int porta;
+        try {
+            porta = Integer.parseInt(portaInput.getText());
+        } catch (NumberFormatException e) {
+            errorLabel.setText("La porta deve essere un numero valido!");
+            return;
+        }
+        new Thread(() -> {
+            try {
+                Socket socket = new Socket(IPInput.getText(), porta);
+                socket.close();
+
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        cambiaScena();
+                    } catch (IOException e) {
+                        System.out.println("Errore nel caricamento della nuova scena.");
+                    }
+                });
+            } catch (IOException e) {
+                javafx.application.Platform.runLater(() -> {
+                    errorLabel.setText("Impossibile connettersi al server.");
+                });
+                return;
+            }
+        }).start();
     }
 
     private void cambiaScena() throws IOException {
