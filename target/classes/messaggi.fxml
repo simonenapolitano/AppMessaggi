@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
@@ -17,22 +18,36 @@
             <Image url="@icon.png" />
          </image>
       </ImageView>
-      <TextField fx:id="messageInput" layoutX="41.0" layoutY="226.0" onAction="#gestisciInvioMessaggio" prefHeight="26.0" prefWidth="263.0" promptText="Scrivi qui..." />
-      <Button layoutX="318.0" layoutY="226.0" mnemonicParsing="false" onAction="#gestisciInvioMessaggio" prefHeight="26.0" prefWidth="86.0" text="Invia">
+      <TextField fx:id="messageInput" layoutX="22.0" layoutY="226.0" onAction="#gestisciInvioMessaggio" prefHeight="26.0" prefWidth="263.0" promptText="Scrivi qui...">
+         <cursor>
+            <Cursor fx:constant="TEXT" />
+         </cursor></TextField>
+      <Button fx:id="emojiButton" layoutX="289.0" layoutY="226.0" mnemonicParsing="false" onAction="#mostraEmojiPicker" prefHeight="26.0" prefWidth="66.0" text="😀">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
+      <Button layoutX="358.0" layoutY="226.0" mnemonicParsing="false" onAction="#gestisciInvioMessaggio" prefHeight="26.0" prefWidth="66.0" text="Invia">
          <font>
             <Font name="Arial" size="12.0" />
          </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
       </Button>
-      <TextArea fx:id="areaMessaggi" editable="false" layoutX="22.0" layoutY="55.0" prefHeight="162.0" prefWidth="402.0" />
-      <Label fx:id="sfondo" alignment="CENTER" layoutX="86.0" layoutY="11.0" prefHeight="38.0" prefWidth="274.0" text="CHAT" textAlignment="CENTER">
-         <font>
-            <Font name="Arial Black" size="30.0" />
-         </font>
-      </Label>
       <Hyperlink fx:id="tornaAlLogin" layoutX="325.0" layoutY="33.0" onAction="#tornaAlLogin" text="Torna al login" underline="true">
          <font>
             <Font name="Arial Black" size="12.0" />
          </font>
       </Hyperlink>
+      <TextArea fx:id="areaMessaggi" editable="false" layoutX="22.0" layoutY="55.0" prefHeight="162.0" prefWidth="402.0">
+         <font>
+            <Font name="Arial" size="13.0" />
+         </font></TextArea>
+      <Label fx:id="sfondo" alignment="CENTER" layoutX="86.0" layoutY="11.0" prefHeight="38.0" prefWidth="274.0" text="CHAT" textAlignment="CENTER">
+         <font>
+            <Font name="Arial Black" size="30.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

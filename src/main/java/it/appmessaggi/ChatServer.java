@@ -128,14 +128,16 @@ public class ChatServer {
                 clientWriters.add(out);
 
                 username = in.readLine();
-                broadcast(username + " si è unito alla chat!");
+                if (username != null) {
+                    broadcast(username + " si è unito alla chat!");
+                }
 
                 String message;
                 while ((message = in.readLine()) != null) {
                     if (message.equalsIgnoreCase("/quit")) {
                         break;
                     }
-                    broadcast(username + ": " + message);
+                    broadcast("[" + username + "] : " + message);
                 }
             } catch (IOException e) {
                 System.out.println("Connessione interrotta con " + username);
