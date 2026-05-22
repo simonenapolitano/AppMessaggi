@@ -27,8 +27,7 @@ public class LoginController {
 
     @FXML
     public void creaChatClient(ActionEvent event) throws IOException {
-        // Controlla che l'utente abbia inserito i dati di base
-        if (IPInput.getText().isEmpty() || usernameInput.getText().isEmpty() || portaInput.getText().isEmpty()) {
+        if (IPInput.getText().isEmpty() || usernameInput.getText().isEmpty() ||  usernameInput.getText().isBlank() || portaInput.getText().isEmpty()) {
             errorLabel.setText("Inserisci IP, porta e Username validi!");
             return;
         }
