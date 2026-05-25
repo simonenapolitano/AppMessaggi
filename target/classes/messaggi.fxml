@@ -27,7 +27,7 @@
             <Cursor fx:constant="HAND" />
          </cursor>
       </Button>
-      <Button layoutX="358.0" layoutY="226.0" mnemonicParsing="false" onAction="#gestisciInvioMessaggio" prefHeight="26.0" prefWidth="66.0" text="Invia">
+      <Button layoutX="358.0" layoutY="226.0" mnemonicParsing="false" onAction="#gestisciInvioMessaggio" prefHeight="26.0" prefWidth="66.0" text="⌯⌲">
          <font>
             <Font name="Arial" size="12.0" />
          </font>
@@ -49,5 +49,13 @@
             <Font name="Arial Black" size="30.0" />
          </font>
       </Label>
+      <Button layoutX="22.0" layoutY="20.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="66.0" text="Msg prvt">
+         <font>
+            <Font name="Arial" size="12.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
    </children>
 </AnchorPane>
