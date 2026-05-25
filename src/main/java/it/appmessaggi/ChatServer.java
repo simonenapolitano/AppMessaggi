@@ -6,10 +6,16 @@ import java.util.*;
 public class ChatServer {
     private Scanner scanner = new Scanner(System.in);
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
-    private static Set<Socket> clientSockets = Collections.synchronizedSet(new HashSet<>());  
+    private static Set<Socket> clientSockets = Collections.synchronizedSet(new HashSet<>());
     private int PORT = 0;
     private ServerSocket serverSocket;
     private volatile boolean running = true; 
+    private static Map<String, PrintWriter> corrispondenze = Collections.synchronizedMap(new HashMap<>());
+
+    public static Map<String, PrintWriter> getCorrispondenze() {
+        return corrispondenze;
+    }
+    
 
     public ChatServer(){
         try {
@@ -114,6 +120,7 @@ public class ChatServer {
         private PrintWriter out;
         private BufferedReader in;
         private String username;
+        
 
         public ClientHandler(Socket socket) {
             this.socket = socket;
@@ -129,6 +136,7 @@ public class ChatServer {
 
                 username = in.readLine();
                 if (username != null) {
+                    corrispondenze.put(username, out);
                     broadcast(username + " si è unito alla chat!");
                 }
 
@@ -137,20 +145,48 @@ public class ChatServer {
                     if (message.equalsIgnoreCase("/quit")) {
                         break;
                     }
-                    broadcast("[" + username + "] : " + message);
+
+                    if(message.startsWith("/msg ")){
+                        inviaMessaggioPrivato(message);
+                    } else {
+                        broadcast("[" + username + "] : " + message);
+                    }
                 }
             } catch (IOException e) {
                 System.out.println("Connessione interrotta con " + username);
             } finally {
                 if (out != null) clientWriters.remove(out);
                 clientSockets.remove(socket);
-                if (username != null) broadcast(username + " ha lasciato la chat.");
+                if (username != null){ 
+                    corrispondenze.remove(username);
+                    broadcast(username + " ha lasciato la chat.");
+                }
                 try {
                     socket.close();
                 } 
                 catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        }
+
+        public void inviaMessaggioPrivato(String messaggio){
+            String[] parti = messaggio.split(" ", 3);
+
+            if(parti.length < 3){
+                out.println("[Server] Errore di sintassi. Usa: /msg <username> <messaggio>");
+                return;
+            }
+
+            String destinatario = parti[1];
+            String messaggioDaInviare = parti[2];
+
+            PrintWriter writerDestinatario = getCorrispondenze().get(destinatario);
+            if (writerDestinatario != null) {
+                writerDestinatario.println("[Privato --> " + username + "]: " + messaggioDaInviare);
+                out.println("[Privato --> " + destinatario + "]: " + messaggioDaInviare);
+            } else {
+                out.println("[Server] L'utente '" + destinatario + "' non è online o non esiste.");
             }
         }
     }
