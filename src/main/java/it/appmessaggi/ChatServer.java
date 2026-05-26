@@ -3,6 +3,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import javafx.scene.control.TextField;
+
 public class ChatServer {
     private Scanner scanner = new Scanner(System.in);
     private static Set<PrintWriter> clientWriters = Collections.synchronizedSet(new HashSet<>());
@@ -11,6 +13,17 @@ public class ChatServer {
     private ServerSocket serverSocket;
     private volatile boolean running = true; 
     private static Map<String, PrintWriter> corrispondenze = Collections.synchronizedMap(new HashMap<>());
+    private static TextField privateUserField;
+    private static TextField privateMessageField;
+
+    private static void setPrivateMessageUserField(TextField privateMessageUserInput){
+        privateUserField = privateMessageUserInput;
+    }
+
+    private static void setPrivateMessageField(TextField privateMessageInput){
+        privateMessageField = privateMessageInput;
+    }
+
 
     public static Map<String, PrintWriter> getCorrispondenze() {
         return corrispondenze;
@@ -18,6 +31,8 @@ public class ChatServer {
     
 
     public ChatServer(){
+        privateUserField = null;
+        privateMessageField = null;
         try {
             System.out.print("\nInserisci una porta: ");
             PORT = scanner.nextInt();
@@ -146,11 +161,7 @@ public class ChatServer {
                         break;
                     }
 
-                    if(message.startsWith("/msg ")){
-                        inviaMessaggioPrivato(message);
-                    } else {
-                        broadcast("[" + username + "] : " + message);
-                    }
+                    broadcast("[" + username + "] : " + message);
                 }
             } catch (IOException e) {
                 System.out.println("Connessione interrotta con " + username);
@@ -170,16 +181,15 @@ public class ChatServer {
             }
         }
 
-        public void inviaMessaggioPrivato(String messaggio){
-            String[] parti = messaggio.split(" ", 3);
-
-            if(parti.length < 3){
-                out.println("[Server] Errore di sintassi. Usa: /msg <username> <messaggio>");
+        public void inviaMessaggioPrivato(){
+            String destinatario = " ", messaggioDaInviare = " ";
+            if(privateUserField == null && privateMessageField == null){
+                System.out.println("Campi non settati! Riprova");
                 return;
+            } else{
+                destinatario = privateUserField.getText();
+                messaggioDaInviare = privateMessageField.getText();
             }
-
-            String destinatario = parti[1];
-            String messaggioDaInviare = parti[2];
 
             PrintWriter writerDestinatario = getCorrispondenze().get(destinatario);
             if (writerDestinatario != null) {

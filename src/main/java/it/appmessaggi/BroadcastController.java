@@ -19,6 +19,7 @@ import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.controlsfx.control.Notifications;
 import java.awt.Toolkit;
@@ -42,12 +43,25 @@ public class BroadcastController {
     @FXML
     private Button emojiButton;
 
+    @FXML
+    private Button messaggiPrivatiButton;
+
+    @FXML
+    private TextField usernameInput;
+
+    @FXML
+    private TextField privateMessageInput;
+
     public void setIP(String IP) {
         this.IP = IP;
     }
 
     public void setPorta(String porta){
         this.portaRicevuta = porta;
+    }
+
+    public PrintWriter getOut() {
+        return this.out;
     }
 
     @FXML
@@ -143,6 +157,34 @@ public class BroadcastController {
         emojiPopup.getItems().add(customMenuItem);
 
         emojiPopup.show(emojiButton, javafx.geometry.Side.TOP, 0, -5);
+    }
+
+    @FXML
+    private void mostraMessaggiPrivati(){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/messaggioPrivato.fxml"));
+            Parent root = loader.load();
+            Stage messaggiPrivatiStage = new Stage();
+            messaggiPrivatiStage.setTitle("Messaggio privato");
+            
+            Scene messaggiPrivatiScene = new Scene(root);
+            messaggiPrivatiStage.setScene(messaggiPrivatiScene);
+
+            Stage mainStage = (Stage) messaggiPrivatiButton.getScene().getWindow();
+            messaggiPrivatiStage.initOwner(mainStage);
+
+            messaggiPrivatiStage.initModality(Modality.WINDOW_MODAL);
+            
+            messaggiPrivatiStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Errore nel caricamento del file FXML del popup.");
+        }
+    }
+
+    @FXML
+    private void inviaMessaggioPrivatoController(){
+        
     }
 
     public void tornaAlLogin(){
