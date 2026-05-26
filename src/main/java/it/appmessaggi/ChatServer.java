@@ -1,9 +1,8 @@
 package it.appmessaggi;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
-
-import javafx.scene.control.TextField;
 
 public class ChatServer {
     private Scanner scanner = new Scanner(System.in);
@@ -13,30 +12,16 @@ public class ChatServer {
     private ServerSocket serverSocket;
     private volatile boolean running = true; 
     private static Map<String, PrintWriter> corrispondenze = Collections.synchronizedMap(new HashMap<>());
-    private static TextField privateUserField;
-    private static TextField privateMessageField;
-
-    private static void setPrivateMessageUserField(TextField privateMessageUserInput){
-        privateUserField = privateMessageUserInput;
-    }
-
-    private static void setPrivateMessageField(TextField privateMessageInput){
-        privateMessageField = privateMessageInput;
-    }
-
 
     public static Map<String, PrintWriter> getCorrispondenze() {
         return corrispondenze;
     }
-    
 
     public ChatServer(){
-        privateUserField = null;
-        privateMessageField = null;
         try {
             System.out.print("\nInserisci una porta: ");
             PORT = scanner.nextInt();
-            scanner.nextLine();
+            scanner.nextLine(); 
         } catch (Exception e) {
             System.out.println("Numero porta invalido!");
             System.exit(1);
@@ -106,18 +91,16 @@ public class ChatServer {
         running = false;
         broadcast("IL SERVER STA PER ESSERE CHIUSO.");
 
-        
         synchronized (clientSockets) {
             for (Socket s : clientSockets) {
                 try {
                     if (!s.isClosed()) s.close();
                 } catch (IOException e) {
-                    
+                    //
                 }
             }
         }
 
-        
         try {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
@@ -136,7 +119,6 @@ public class ChatServer {
         private BufferedReader in;
         private String username;
         
-
         public ClientHandler(Socket socket) {
             this.socket = socket;
         }
@@ -161,7 +143,25 @@ public class ChatServer {
                         break;
                     }
 
-                    broadcast("[" + username + "] : " + message);
+                    if (message.startsWith("/privato:")) {
+                        String[] parti = message.split(":", 3);
+                        
+                        if (parti.length == 3) {
+                            String destinatario = parti[1].trim();
+                            String messaggioPrivato = parti[2];
+
+                            PrintWriter writerDestinatario = corrispondenze.get(destinatario);
+                            
+                            if (writerDestinatario != null) {
+                                writerDestinatario.println("[Privato da " + username + "]: " + messaggioPrivato);
+                                out.println("[Privato a " + destinatario + "]: " + messaggioPrivato);
+                            } else {
+                                out.println("[Server] L'utente '" + destinatario + "' non è online o non esiste.");
+                            }
+                        }
+                    } else {
+                        broadcast("[" + username + "] : " + message);
+                    }
                 }
             } catch (IOException e) {
                 System.out.println("Connessione interrotta con " + username);
@@ -174,29 +174,9 @@ public class ChatServer {
                 }
                 try {
                     socket.close();
-                } 
-                catch (IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-        }
-
-        public void inviaMessaggioPrivato(){
-            String destinatario = " ", messaggioDaInviare = " ";
-            if(privateUserField == null && privateMessageField == null){
-                System.out.println("Campi non settati! Riprova");
-                return;
-            } else{
-                destinatario = privateUserField.getText();
-                messaggioDaInviare = privateMessageField.getText();
-            }
-
-            PrintWriter writerDestinatario = getCorrispondenze().get(destinatario);
-            if (writerDestinatario != null) {
-                writerDestinatario.println("[Privato --> " + username + "]: " + messaggioDaInviare);
-                out.println("[Privato --> " + destinatario + "]: " + messaggioDaInviare);
-            } else {
-                out.println("[Server] L'utente '" + destinatario + "' non è online o non esiste.");
             }
         }
     }

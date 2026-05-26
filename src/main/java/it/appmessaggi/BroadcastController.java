@@ -52,6 +52,8 @@ public class BroadcastController {
     @FXML
     private TextField privateMessageInput;
 
+    private boolean messaggioPrivatoMandato = false;
+
     public void setIP(String IP) {
         this.IP = IP;
     }
@@ -161,8 +163,12 @@ public class BroadcastController {
 
     @FXML
     private void mostraMessaggiPrivati(){
+        messaggioPrivatoMandato = false;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/messaggioPrivato.fxml"));
+            
+            loader.setController(this); 
+            
             Parent root = loader.load();
             Stage messaggiPrivatiStage = new Stage();
             messaggiPrivatiStage.setTitle("Messaggio privato");
@@ -172,7 +178,6 @@ public class BroadcastController {
 
             Stage mainStage = (Stage) messaggiPrivatiButton.getScene().getWindow();
             messaggiPrivatiStage.initOwner(mainStage);
-
             messaggiPrivatiStage.initModality(Modality.WINDOW_MODAL);
             
             messaggiPrivatiStage.showAndWait();
@@ -184,7 +189,29 @@ public class BroadcastController {
 
     @FXML
     private void inviaMessaggioPrivatoController(){
-        
+        String destinatario = usernameInput.getText().trim();
+        String messaggio = privateMessageInput.getText().trim();
+
+        System.out.println("Destinatario: " + destinatario);
+        System.out.println("Messaggio che privato che vuoi mandare: " + messaggio);
+
+        if (destinatario.isEmpty() || messaggio.isEmpty()) {
+            System.out.println("Destinatario o messaggio mancanti!");
+            return;
+        }
+
+        if (out != null) {
+            out.println("/privato:" + destinatario + ":" + messaggio);
+            
+            privateMessageInput.clear();
+            Stage popup = (Stage)privateMessageInput.getScene().getWindow();
+            if(popup != null){
+                popup.close();
+            }
+        } else {
+            System.out.println("Non sei connesso al server!");
+        }
+        messaggioPrivatoMandato = true;
     }
 
     public void tornaAlLogin(){
