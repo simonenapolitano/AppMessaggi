@@ -1,8 +1,19 @@
 package it.appmessaggi;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 
 public class ChatServer {
     private Scanner scanner = new Scanner(System.in);
@@ -144,21 +155,13 @@ public class ChatServer {
                     }
 
                     if (message.startsWith("/privato:")) {
-                        String[] parti = message.split(":", 3);
+                        String[] parti = message.split(":", 6); 
                         
-                        if (parti.length == 3) {
-                            String destinatario = parti[1].trim();
-                            String messaggioPrivato = parti[2];
-
-                            PrintWriter writerDestinatario = corrispondenze.get(destinatario);
-                            
-                            if (writerDestinatario != null) {
-                                writerDestinatario.println("[Privato da " + username + "]: " + messaggioPrivato);
-                                out.println("[Privato a " + destinatario + "]: " + messaggioPrivato);
-                            } else {
-                                out.println("[Server] L'utente '" + destinatario + "' non è online o non esiste.");
-                            }
-                        }
+                        if (parti.length == 6) {
+                            broadcast(message);
+                        } else {
+                            System.out.println("Errore: Pacchetto /privato malformato ricevuto da " + username);
+                        } 
                     } else {
                         broadcast("[" + username + "] : " + message);
                     }

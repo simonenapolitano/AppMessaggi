@@ -1,12 +1,21 @@
 package it.appmessaggi;
 
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Random;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+
+import org.controlsfx.control.Notifications;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -21,8 +30,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.controlsfx.control.Notifications;
-import java.awt.Toolkit;
 
 public class BroadcastController {
     private String IP;
@@ -52,7 +59,7 @@ public class BroadcastController {
     @FXML
     private TextField privateMessageInput;
 
-    private boolean messaggioPrivatoMandato = false;
+    private Random random;
 
     public void setIP(String IP) {
         this.IP = IP;
@@ -163,7 +170,6 @@ public class BroadcastController {
 
     @FXML
     private void mostraMessaggiPrivati(){
-        messaggioPrivatoMandato = false;
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/messaggioPrivato.fxml"));
             
@@ -201,7 +207,18 @@ public class BroadcastController {
         }
 
         if (out != null) {
-            out.println("/privato:" + destinatario + ":" + messaggio);
+            try {
+                random = new Random();
+                String AESSalt = String.valueOf(random.nextInt(10000));
+                SecretKey chiave = AESEncryption.getKeyFromPassword("passwordsupersicura", AESSalt);
+                GCMParameterSpec IV = AESEncryption.generateIv();
+                String messaggioCriptato = AESEncryption.encrypt("AES/GCM/NoPadding", messaggio, chiave, IV);
+                String IVBase64 = Base64.getEncoder().encodeToString(IV.getIV());
+                String comandoBroadcast = "/privato:" + usernameRicevuto + ":" + destinatario + ":" + IVBase64 + ":" + AESSalt + ":" + messaggioCriptato;
+                out.println(comandoBroadcast);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             
             privateMessageInput.clear();
             Stage popup = (Stage)privateMessageInput.getScene().getWindow();
@@ -211,7 +228,8 @@ public class BroadcastController {
         } else {
             System.out.println("Non sei connesso al server!");
         }
-        messaggioPrivatoMandato = true;
+        
+
     }
 
     public void tornaAlLogin(){
@@ -290,22 +308,55 @@ public class BroadcastController {
             try {
                 String serverMessage;
                 while ((serverMessage = in.readLine()) != null) {
-                    System.out.println(serverMessage);
-                    String messaggio = serverMessage;
+                    System.out.println("Ricevuto: " + serverMessage);
+                    String testoDaMostrare = serverMessage; 
+
+                    if (serverMessage.startsWith("/privato:")) {
+                        String parti[] = serverMessage.split(":", 6);
+
+                        if (parti.length == 6) {
+                            String mittente = parti[1];
+                            String destinatario = parti[2];
+                            String IV = parti[3];
+                            String AESSalt = parti[4];
+                            String messaggioCriptato = parti[5];
+                            
+                            if (controller.usernameRicevuto.equalsIgnoreCase(destinatario) || controller.usernameRicevuto.equalsIgnoreCase(mittente)) {
+                                try {
+                                    SecretKey chiave = AESEncryption.getKeyFromPassword("passwordsupersicura", AESSalt);
+                                    byte[] IVBytes = Base64.getDecoder().decode(IV);
+                                    GCMParameterSpec IVDec = new GCMParameterSpec(128, IVBytes);
+                                    String messaggioDecriptato = AESEncryption.decrypt("AES/GCM/NoPadding", messaggioCriptato, chiave, IVDec);
+                                    
+                                    if (controller.usernameRicevuto.equalsIgnoreCase(mittente)) {
+                                        testoDaMostrare = "[" + mittente + " --> " + destinatario + "]: " + messaggioDecriptato;
+                                    } else {
+                                        testoDaMostrare = "[" + mittente + " --> " + destinatario + "]: " + messaggioDecriptato;
+                                    }
+                                } catch (Exception e) {
+                                    testoDaMostrare = "[Errore Decifratura da " + mittente + "]";
+                                }
+                            } else {
+                                testoDaMostrare = "[Privato --> Privato]: " + messaggioCriptato;
+                            }
+                        }
+                    }
+
+                    final String messaggioFinale = testoDaMostrare;
+
                     javafx.application.Platform.runLater(() -> {
-                        controller.areaMessaggi.appendText(messaggio + "\n");
+                        controller.areaMessaggi.appendText(messaggioFinale + "\n");
 
                         Stage stageAttuale = (Stage) controller.areaMessaggi.getScene().getWindow();
                         if (stageAttuale.isIconified() || !stageAttuale.isFocused()) {
                             Toolkit.getDefaultToolkit().beep();
-                            String notifica = messaggio;
+                            String notifica = messaggioFinale;
                             int maxCaratteri = 40;
                             if (notifica.length() > maxCaratteri) {
                                 notifica = notifica.substring(0, maxCaratteri) + "...";
                             }
                             Notifications.create().title("💬 Uazzapp 2").text(notifica).position(Pos.TOP_RIGHT).darkStyle().showInformation();
                         }
-
                     });
                 }
             } catch (IOException e) {
