@@ -1,0 +1,21 @@
+@startuml CasiD'uso
+left to right direction
+actor Utente
+
+rectangle "Sistema Uazzapp 2" {
+  usecase "Effettuare il Login" as UC_Login
+  usecase "Inviare Messaggio Pubblico (Broadcast)" as UC_Pub
+  usecase "Inserire Emoji" as UC_Emoji
+  usecase "Inviare Messaggio Privato Criptato" as UC_Priv
+  usecase "Ricevere Notifiche in Background" as UC_Notifica
+}
+
+Utente --> UC_Login
+Utente --> UC_Pub
+Utente --> UC_Emoji
+Utente --> UC_Priv
+Utente --> UC_Notifica
+
+UC_Pub ..> UC_Emoji : <<extend>>
+UC_Priv ..> UC_Emoji : <<extend>>
+@endum

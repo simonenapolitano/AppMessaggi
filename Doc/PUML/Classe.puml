@@ -1,0 +1,66 @@
+@startuml Classe
+package "it.appmessaggi" {
+
+    class Main {
+        +start(stage: Stage)
+        +main(args: String[])
+    }
+
+    class LoginController {
+        -IPInput: TextField
+        -usernameInput: TextField
+        -portaInput: TextField
+        -errorLabel: Label
+        +creaChatClient(event: ActionEvent)
+        -cambiaScena()
+    }
+
+    class BroadcastController {
+        -IP: String
+        -usernameRicevuto: String
+        -portaRicevuta: String
+        -out: PrintWriter
+        -socket: Socket
+        -areaMessaggi: TextArea
+        +connettiAlServer()
+        +mostraMessaggiPrivati()
+        +inviaMessaggioPrivatoController()
+        +gestisciInvioMessaggio()
+    }
+
+    class ReadThread {
+        -in: BufferedReader
+        +run()
+    }
+
+    class ChatServer {
+        -PORT: int
+        -serverSocket: ServerSocket
+        -clientWriters: Set<PrintWriter>
+        +broadcast(message: String)
+        -spegniServer()
+    }
+
+    class ClientHandler {
+        -socket: Socket
+        -username: String
+        +run()
+    }
+
+    class AESEncryption {
+        +getKeyFromPassword(password, salt): SecretKey
+        +generateIv(): GCMParameterSpec
+        +encrypt(algorithm, input, key, iv): String
+        +decrypt(algorithm, cipherText, key, iv): String
+    }
+}
+
+Main ..> LoginController : Carica FXML
+LoginController ..> BroadcastController : Passa dati e istanzia
+BroadcastController +-- ReadThread : Contiene internamente
+ChatServer +-- ClientHandler : Gestisce le connessioni
+BroadcastController ..> AESEncryption : Usa per criptare
+ReadThread ..> AESEncryption : Usa per decriptare
+BroadcastController <--> ClientHandler : Comunicazione via Socket
+
+@endum

@@ -1,0 +1,20 @@
+@startuml Stato
+skinparam linestyle ortho
+
+[*] --> Inizializzazione : Avvio main()
+
+Inizializzazione --> ConfigurazionePorta : Richiesta input utente
+ConfigurazionePorta --> InAscolto : Porta valida / ServerSocket creato
+ConfigurazionePorta --> [*] : Errore porta (System.exit)
+
+state InAscolto {
+  [*] --> AttesaConnessione
+  AttesaConnessione --> AccettaClient : clientSocket accettato
+  AccettaClient --> GestioneMessaggi : Avvio ClientHandler
+  GestioneMessaggi --> AttesaConnessione : Continua ad ascoltare
+}
+
+InAscolto --> Spegnimento : Ricevuto comando '/stop'
+Spegnimento --> [*] : Chiusura socket e uscita
+
+@endum

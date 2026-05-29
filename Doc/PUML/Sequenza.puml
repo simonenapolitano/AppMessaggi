@@ -1,0 +1,31 @@
+@startuml Sequenza
+actor Utente
+boundary LoginController
+boundary BroadcastController
+control ChatServer
+control ClientHandler
+
+Utente -> LoginController : Inserisce IP, Porta, Username e clicca Accedi
+activate LoginController
+
+LoginController -> ChatServer : Tenta connessione Socket temporanea
+ChatServer --> LoginController : Connessione riuscita
+LoginController -> LoginController : cambiaScena()
+
+create BroadcastController
+LoginController -> BroadcastController : Inizializza con i dati inseriti
+deactivate LoginController
+activate BroadcastController
+
+BroadcastController -> ChatServer : Apri Socket definitiva e invia Username
+activate ChatServer
+
+create ClientHandler
+ChatServer -> ClientHandler : Crea thread dedicato per il client
+activate ClientHandler
+
+ClientHandler -> ChatServer : broadcast("Utente si è unito alla chat!")
+ChatServer -> BroadcastController : Invia notifica di benvenuto
+BroadcastController -> Utente : Mostra interfaccia principale della chat
+deactivate BroadcastController
+@endum

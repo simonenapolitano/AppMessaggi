@@ -1,0 +1,26 @@
+@startuml Attività
+start
+
+:Utente compila destinatario e messaggio;
+:Genera Salt (casuale) e IV (SecureRandom);
+:Genera chiave segreta tramite PBKDF2;
+:Cripta il testo con AES/GCM/NoPadding;
+:Invia stringa formattata "/privato:..." al Server;
+
+if (Server riceve il pacchetto?) then (Sì)
+  :Invia stringa in broadcast a tutti i client;
+else (No)
+  stop
+endif
+
+:Client generico riceve la stringa;
+if (L'utente corrente è mittente o destinatario?) then (Sì)
+  :Rigenera la chiave AES usando il Salt ricevuto;
+  :Decodifica l'IV e decripta il testo;
+  :Mostra il messaggio in chiaro;
+else (No)
+  :Mostra il messaggio criptato incomprensibile;
+endif
+
+stop
+@endum
