@@ -1,6 +1,6 @@
 ### Applicazione creata con Java e JavaFX
 
-# :video_game: COME SCARICARE L'APPLICAZIONE :video_game:
+# :speech_balloon: COME SCARICARE L'APPLICAZIONE :speech_balloon:
 ## :diamond_shape_with_a_dot_inside: Windows :diamond_shape_with_a_dot_inside:
 Puoi scaricare la nostra app dal [nostro sito](https://cristiandamico08-jpg.github.io/Uazzapp2-downloads/)
 
